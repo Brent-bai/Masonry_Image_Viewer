@@ -523,7 +523,7 @@
       <button id="filtmono" class="span2">黑白漫画</button>
       <button id="filtborder" class="span2">纯色边框</button>
       <button id="revert">反转</button>
-      <div class="tip">
+      <div class="tip span1">
         宽高：
         <div class="tootip">
           例：<br />
@@ -532,20 +532,29 @@
           “-16:9”表示宽高比小于16：9<br />
           “4:3-16:9”表示宽高比在4:3到16：9之间<br />
         </div>
+      </div>      
+      <input type="text" id="aspectratio" class="span4" />      
+      <div></div>    
+      <div class="tip">速度：
+        <div class="tootip">视频播放倍速</div>
       </div>
-      <input type="text" id="aspectratio" class="span3" />
-      <button id="exportDeleteList" class="span2">导出删除列表</button>
-      <div>速度：</div>
       <input
         type="range"
         id="videospeedinput"
         min="1"
         max="10"
-        value="10"
-        class="span3"
+        value="5"
+        class="span4"
       />
-      <div id="videospeed">10</div>
-      
+      <div id="videospeed">5</div>
+      <div>操作：</div>
+      <button id="exportDeleteList" class="tip span2">导出删除列表
+        <div class="tootip">将当前所选文件导出一个<br/>
+          删除这些文件的批处理程序</div>
+      </button>
+      <button id="silent" class="tip active">禁音
+        <div class="tootip">静音播放视频</div>
+      </button>
     </div>
     <script>
       class Queue {
@@ -794,6 +803,30 @@
         videospeedinput.onchange({ target: videospeedinput });
         videospeedinput.oninput({ target: videospeedinput });
       }
+      
+      // 初始化视频静音按钮
+      function initSilent() {
+        let store = localStorage.getItem("silent");
+        silent.active = store !== "false"; // 默认静音
+        if (silent.active) silent.classList.add("active");
+        
+        silent.onclick = (e) => {
+          let button = e.target;
+          button.classList.toggle("active");
+          button.active = button.classList.contains("active");
+          localStorage.setItem("silent", button.active);
+          
+          // 更新页面上所有视频的静音状态
+          document.querySelectorAll('video').forEach(video => {
+            video.muted = button.active;
+          });
+        };
+        
+        // 初始设置所有视频的静音状态
+        document.querySelectorAll('video').forEach(video => {
+          video.muted = silent.active;
+        });
+      }
       document.ondrop = async (e) => {
         if (e.dataTransfer.types[0] !== "Files") return;
         e.preventDefault();
@@ -946,7 +979,7 @@
             let video = newEl("video");
             video.src = URL.createObjectURL(file);
             video.controls = false; // 不显示默认控件
-            video.muted = true; // 静音播放
+            video.muted = silent.active; // 根据静音按钮状态设置静音
             video.path = file.path; // 设置path属性
             // 不设置poster属性，让浏览器自动显示第一帧
             
@@ -1156,7 +1189,7 @@
           rep.controls = true;
           rep.autoplay = true;
           rep.loop = true;
-          rep.muted = true;
+          rep.muted = silent.active;
         }
         
         rep.id = "rep";
@@ -1232,7 +1265,7 @@
           // 确保视频元素的属性正确设置
           zoom.controls = true;
           zoom.loop = true;
-          zoom.muted = true;
+          zoom.muted = silent.active;
         }
         rep.replaceWith(zoom);
         cover.classList.remove("show");
@@ -1337,6 +1370,7 @@
       initFilt();
       configs.forEach(initConfig);
       initVideoSpeed(); // 初始化视频播放速度配置
+      initSilent(); // 初始化视频静音功能
       imgbox.onmouseout = addInfo;
       imgbox.onmouseenter = addInfo;
       cursorplace.onmouseout = addInfo;
@@ -1527,7 +1561,7 @@
           // 设置0.5秒延迟后开始播放
           let timeout = setTimeout(() => {
             // 使用用户设置的播放速度
-            let speed = parseFloat(videospeedinput.value) || 10.0;
+            let speed = parseFloat(videospeedinput.value) || 5.0;
             video.playbackRate = speed;
             // 恢复播放而不是重新播放
             video.play();
