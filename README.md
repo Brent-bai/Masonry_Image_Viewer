@@ -1,6 +1,8 @@
 # Masonry_Image_Viewer
-添加批量删除图片功能，导出一个批处理程序
-Add export command file which can delete images in batch function
+ 添加批量删除图片功能，导出一个批处理程序  
+ 支持倍速预览和删除视频功能
+ Add export command file which can delete images in batch function 
+ Add supporting video file
 
 # Original Project
 原始项目 https://github.com/wlm3201/Masonry_Image_Viewer/tree/release
